@@ -1,4 +1,4 @@
-# Obsidian Image Auto Upload Plugin
+# Obsidian LskyPro Auto Upload Plugin
 
 这是一个支持直接上传图片到图床[Lsky](https://github.com/lsky-org/lsky-pro)的工具，基于[renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin.git)改造。
 **更新插件后记得重启一下 Obsidian**

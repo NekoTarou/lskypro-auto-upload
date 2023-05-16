@@ -1,25 +1,25 @@
-# Obsidian Image Auto Upload Plugin
+# Obsidian LskyPro Auto Upload Plugin
 
-这是一个支持直接上传图片到图床[Lsky](https://github.com/lsky-org/lsky-pro)的工具，基于[renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin.git)改造。
-**更新插件后记得重启一下 Obsidian**
+This is a tool that supports uploading images directly to the image bed [Lsky](https://github.com/lsky-org/lsky-pro), based on [renmu123/obsidian-image-auto-upload-plugin](https: //github.com/renmu123/obsidian-image-auto-upload-plugin.git) modification.
+**Remember to restart Obsidian after updating the plugin**
 
-# 开始
+# Start
 
-1. 安装 LskyPro 图床，并进行配置，配置参考[官网](https://www.lsky.pro/)
-2. 开启 LskyPro 的接口
-3. 使用授权接口获取Token，并记录下来
-4. 打开插件配置项，设置LskyPro域名(例如：https://lsky.xxx.com)
-5. 设置LskyPro Token
-6. 存储策略ID是可选配置，根据 LskyPro 的策略和自己的要求来配置，如果只有一个策略，可以不设置
+1. Install the LskyPro image bed and configure it. For configuration, refer to [official website](https://www.lsky.pro/)
+2. Open the interface of LskyPro
+3. Use the authorization interface to obtain Token and record it
+4. Open the plug-in configuration item and set the LskyPro domain name (for example: https://lsky.xxx.com)
+5. Set LskyPro Token
+6. The storage policy ID is an optional configuration, and it is configured according to LskyPro's policy and its own requirements. If there is only one policy, it does not need to be set
 
-# 特性
+# Features
 
-## 剪切板上传
+## Upload when paste image
 
-支持黏贴剪切板的图片的时候直接上传，目前支持复制系统内图像直接上传。
-支持通过设置 `frontmatter` 来控制单个文件的上传，默认值为 `true`，控制关闭请将该值设置为 `false`
+It supports uploading directly when pasting pictures from the clipboard, and currently supports copying images in the system and uploading them directly.
+Support to control the upload of a single file by setting `frontmatter`, the default value is `true`, please set the value to `false` to control the shutdown
 
-支持 ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg", ".tiff"（因为是直接调用LskyPro接口，理论上图床支持的文件都可以）
+Support ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".svg", ".tiff" (because it directly calls the LskyPro interface, theoretically the files supported by the image bed It will be all right)
 
 ```yaml
 ---
@@ -27,28 +27,23 @@ image-auto-upload: true
 ---
 ```
 
-## 批量上传一个文件中的所有图像文件
+## Upload all local images file by command
 
-输入 `ctrl+P` 呼出面板，输入 `upload all images`，点击回车，就会自动开始上传。
+press ctrl+P and input upload all images，enter, then will auto upload all local images
 
-路径解析优先级，会依次按照优先级查找：
+The path resolution priority will be searched according to the priority in turn:
 
-1. 绝对路径，指基于库的绝对路径
-2. 相对路径，以./或../开头
-3. 尽可能简短的形式
+1. Absolute path, refers to the absolute path based on the library
+2. Relative paths, starting with ./ or ../
+3. shortest possible form
 
-## 批量下载网络图片到本地
+## download all internet to local
 
-输入 `ctrl+P` 呼出面板，输入 `download all images`，点击回车，就会自动开始下载。只在 win 进行过测试
+press ctrl+P and input upload all images，enter, then will auto upload all local images
 
-## 支持右键菜单上传图片
+## Support drag-and-drop
 
-目前已支持标准 md 以及 wiki 格式。支持相对路径以及绝对路径，需要进行正确设置，不然会引发奇怪的问题
-
-## 支持拖拽上传
-
-允许多文件拖拽
-
+Allow multiple file drag and drop
 
 
 # TODO
