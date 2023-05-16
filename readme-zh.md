@@ -53,3 +53,6 @@ image-auto-upload: true
 
 # TODO
 
+# 感谢
+
+[renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin.git)

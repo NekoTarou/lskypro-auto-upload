@@ -48,3 +48,5 @@ Allow multiple file drag and drop
 
 # TODO
 
+# Thanks
+[renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin.git)
