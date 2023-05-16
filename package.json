@@ -1,5 +1,5 @@
 {
-  "name": "obsidian-lskypro-plugin",
+  "name": "lskypro-auto-upload",
   "version": "1.0.0",
   "type": "module",
   "description": "This plugin uploads images from your clipboard to lskypro and embeds uploaded image to your note",
@@ -10,7 +10,9 @@
   },
   "keywords": [
     "obsidian.md",
-    "lsky"
+    "lsky",
+    "upload",
+    "auto"
   ],
   "author": "nekoutarou",
   "license": "MIT",
