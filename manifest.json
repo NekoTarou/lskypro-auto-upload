@@ -1,6 +1,6 @@
 {
   "id": "lskypro-auto-upload",
-  "name": "Image auto upload Plugin to lskypro",
+  "name": "Auto upload image to lskypro",
   "version": "1.0.0",
   "minAppVersion": "1.2.8",
   "description": "This plugin uploads images from your clipboard to lskypro",
