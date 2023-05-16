@@ -1,0 +1,10 @@
+{
+  "id": "obsidian-lskypro-auto-upload-plugin",
+  "name": "Image auto upload Plugin to lskypro",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "This plugin uploads images from your clipboard to lskypro",
+  "author": "NekouTarou",
+  "authorUrl": "https://github.com/NekoTarou/obsidian-lskypro-auto-upload-plugin.git",
+  "isDesktopOnly": true
+}

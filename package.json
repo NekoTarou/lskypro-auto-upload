@@ -1,0 +1,33 @@
+{
+  "name": "obsidian-lskypro-plugin",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "This plugin uploads images from your clipboard to lskypro and embeds uploaded image to your note",
+  "main": "main.js",
+  "scripts": {
+    "dev": "rollup --config rollup.config.js -w",
+    "build": "rollup --config rollup.config.js"
+  },
+  "keywords": [
+    "obsidian.md",
+    "lsky"
+  ],
+  "author": "nekoutarou",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@types/electron": "^1.6.10",
+    "@types/node": "^14.14.2",
+    "obsidian": "^1.2.8",
+    "rollup": "^3.21.6",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "fix-path": "^4.0.0",
+    "image-type": "^5.2.0"
+  }
+}
