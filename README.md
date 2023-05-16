@@ -1,6 +1,6 @@
 # Obsidian LskyPro Auto Upload Plugin
 
-This is a tool that supports uploading images directly to the image bed [Lsky](https://github.com/lsky-org/lsky-pro), based on [renmu123/obsidian-image-auto-upload-plugin](https: //github.com/renmu123/obsidian-image-auto-upload-plugin.git) modification.
+This is a tool that supports uploading images directly to the image bed [Lsky](https://github.com/lsky-org/lsky-pro), based on [renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin.git) modification.
 **Remember to restart Obsidian after updating the plugin**
 
 # Start
