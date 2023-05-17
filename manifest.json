@@ -3,8 +3,8 @@
   "name": "Auto upload image to lskypro",
   "version": "1.0.0",
   "minAppVersion": "1.2.8",
-  "description": "This plugin uploads images from your clipboard to lskypro",
+  "description": "Auto upload images from clipboard to lskypro",
   "author": "NekouTarou",
-  "authorUrl": "https://github.com/NekoTarou/lskypro-auto-upload.git",
+  "authorUrl": "https://jiusia.top",
   "isDesktopOnly": true
 }
