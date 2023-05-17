@@ -3,6 +3,7 @@ import { parse } from "path";
 
 interface Image {
   path: string;
+  obspath: string;
   name: string;
   source: string;
 }
@@ -80,6 +81,7 @@ export default class Helper {
 
       fileArray.push({
         path: path,
+        obspath: path,
         name: name,
         source: source,
       });
@@ -91,6 +93,7 @@ export default class Helper {
       const source = match[0];
       fileArray.push({
         path: path,
+        obspath: path,
         name: name,
         source: source,
       });

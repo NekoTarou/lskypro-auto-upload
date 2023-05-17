@@ -13,26 +13,23 @@ import {
   MarkdownFileInfo,
 } from "obsidian";
 
-import { resolve, relative, join, parse, posix, basename, dirname } from "path";
-import { existsSync, mkdirSync, writeFileSync, unlink } from "fs";
+import { join, parse, basename, dirname } from "path";
 
-import fixPath from "fix-path";
 import imageType from "image-type";
 
 import {
   isAssetTypeAnImage,
-  isAnImage,
   getUrlAsset,
   arrayToObject,
 } from "./utils";
 import { LskyProUploader } from "./uploader";
 import Helper from "./helper";
-import { t } from "./lang/helpers";
 
 import { SettingTab, PluginSettings, DEFAULT_SETTINGS } from "./setting";
 
 interface Image {
   path: string;
+  obspath: string;
   name: string;
   source: string;
 }
@@ -77,7 +74,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       id: "Upload all images",
       name: "Upload all images",
       checkCallback: (checking: boolean) => {
-        let leaf = this.app.workspace.activeLeaf;
+        let leaf = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (leaf) {
           if (!checking) {
             this.uploadAllFile();
@@ -91,7 +88,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       id: "Download all images",
       name: "Download all images",
       checkCallback: (checking: boolean) => {
-        let leaf = this.app.workspace.activeLeaf;
+        let leaf = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (leaf) {
           if (!checking) {
             this.downloadAllImageFiles();
@@ -137,10 +134,11 @@ export default class imageAutoUploadPlugin extends Plugin {
   }
 
   async downloadAllImageFiles() {
-    const folderPath = this.getFileAssetPath();
     const fileArray = this.helper.getAllFiles();
-    if (!existsSync(folderPath)) {
-      mkdirSync(folderPath);
+    const folderPathAbs = this.getAttachmentFolderPath();
+    let absfolder = this.app.vault.getAbstractFileByPath(folderPathAbs);
+    if (!absfolder) {
+      this.app.vault.createFolder(folderPathAbs);
     }
 
     let imageArray = [];
@@ -151,40 +149,26 @@ export default class imageAutoUploadPlugin extends Plugin {
 
       const url = file.path;
       const asset = getUrlAsset(url);
-      // if (!isAnImage(asset.substr(asset.lastIndexOf(".")))) {
-      //   continue;
-      // }
       let [name, ext] = [
         decodeURI(parse(asset).name).replaceAll(/[\\\\/:*?\"<>|]/g, "-"),
         parse(asset).ext,
       ];
 
       // 如果文件名已存在，则用随机值替换
-      if (existsSync(join(folderPath, encodeURI(asset)))) {
-        name = (Math.random() + 1).toString(36).substr(2, 5);
+      if (this.app.vault.getAbstractFileByPath(folderPathAbs+"/"+asset)) {
+        name = (Math.random() + 1).toString(36).substring(2, 7);
       }
-      // name = `image-${name}`;
 
-      const response = await this.download(url, folderPath, name, ext);
+      const response = await this.download(url, folderPathAbs, name, ext);
 
       if (response.ok) {
-        const activeFolder = this.app.vault.getAbstractFileByPath(
-          this.app.workspace.getActiveFile().path
-        ).parent.path;
-
-        const basePath = (
-          this.app.vault.adapter as FileSystemAdapter
-        ).getBasePath();
-        const abstractActiveFolder = resolve(basePath, activeFolder);
-
         imageArray.push({
           source: file.source,
           name: name,
-          path: normalizePath(relative(abstractActiveFolder, response.path)),
+          path: response.path,
         });
       }
     }
-
     let value = this.helper.getValue();
     imageArray.map(image => {
       value = value.replace(
@@ -202,29 +186,26 @@ export default class imageAutoUploadPlugin extends Plugin {
       }`
     );
   }
-
-  // 获取当前文件所属的附件文件夹
-  getFileAssetPath() {
-    const basePath = (
-      this.app.vault.adapter as FileSystemAdapter
-    ).getBasePath();
-
+  //获取附件路径（相对路径）
+  getAttachmentFolderPath() {
     // @ts-ignore
-    const assetFolder: string = this.app.vault.config.attachmentFolderPath;
+    let assetFolder: string = this.app.vault.config.attachmentFolderPath;
+    if (!assetFolder) {
+      assetFolder = "/"
+    }
     const activeFile = this.app.vault.getAbstractFileByPath(
       this.app.workspace.getActiveFile().path
     );
-
+    const parentPath = activeFile.parent.path;
     // 当前文件夹下的子文件夹
     if (assetFolder.startsWith("./")) {
-      const activeFolder = decodeURI(resolve(basePath, activeFile.parent.path));
-      return join(activeFolder, assetFolder);
+      assetFolder = assetFolder.substring(1);
+      return parentPath + (assetFolder==="/"?"":assetFolder);
     } else {
-      // 根文件夹
-      return join(basePath, assetFolder);
+      return assetFolder;
     }
   }
-
+  
   async download(url: string, folderPath: string, name: string, ext: string) {
     const response = await requestUrl({ url });
     const type = await imageType(new Uint8Array(response.arrayBuffer));
@@ -245,13 +226,15 @@ export default class imageAutoUploadPlugin extends Plugin {
     const buffer = Buffer.from(response.arrayBuffer);
 
     try {
-      let path = join(folderPath, `${name}${ext}`);
+      let path = folderPath+'/'+`${name}${ext}`;
 
       if (!ext) {
-        path = join(folderPath, `${name}.${type.ext}`);
+        path = folderPath +'/'+ `${name}.${type.ext}`;
       }
-
-      writeFileSync(path, buffer);
+      this.app.vault.createBinary(path,buffer,{
+        ctime: Date.now(),
+        mtime: Date.now()
+      })
       return {
         ok: true,
         msg: "ok",
@@ -313,6 +296,7 @@ export default class imageAutoUploadPlugin extends Plugin {
         if (isAssetTypeAnImage(abstractImageFile)) {
           imageList.push({
             path: abstractImageFile,
+            obspath: match.path,
             name: imageName,
             source: match.source,
           });
@@ -347,7 +331,10 @@ export default class imageAutoUploadPlugin extends Plugin {
         if (this.settings.deleteSource) {
           imageList.map(image => {
             if (!image.path.startsWith("http")) {
-              unlink(image.path, () => { });
+              let delFile = this.app.vault.getAbstractFileByPath(image.obspath);
+              if (delFile) {
+                this.app.vault.delete(delFile);
+              }
             }
           });
         }
@@ -371,6 +358,7 @@ export default class imageAutoUploadPlugin extends Plugin {
           ) {
             imageList.push({
               path: match.path,
+              obspath: match.path,
               name: match.name,
               source: match.source,
             });
@@ -379,6 +367,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       } else {
         imageList.push({
           path: match.path,
+          obspath: match.obspath,
           name: match.name,
           source: match.source,
         });
@@ -413,40 +402,38 @@ export default class imageAutoUploadPlugin extends Plugin {
       if (encodedUri.startsWith("http")) {
         imageList.push({
           path: match.path,
+          obspath: match.obspath,
           name: imageName,
           source: match.source,
         });
       } else {
-        const fileName = basename(decodeURI(encodedUri));
+        debugger
+        const matchPath = decodeURI(encodedUri);
+        const fileName = basename(matchPath);
         let file;
         // 绝对路径
-        if (filePathMap[decodeURI(encodedUri)]) {
-          file = filePathMap[decodeURI(encodedUri)];
+        if (filePathMap[matchPath]) {
+          file = filePathMap[matchPath];
         }
 
         // 相对路径
         if (
-          (!file && decodeURI(encodedUri).startsWith("./")) ||
-          decodeURI(encodedUri).startsWith("../")
+          (!file && matchPath.startsWith("./")) ||
+          matchPath.startsWith("../")
         ) {
-          const filePath = resolve(
-            join(basePath, dirname(activeFile.path)),
-            decodeURI(encodedUri)
-          );
-
-          if (existsSync(filePath)) {
-            const path = normalizePath(
-              relative(
-                basePath,
-                resolve(
-                  join(basePath, dirname(activeFile.path)),
-                  decodeURI(encodedUri)
-                )
-              )
-            );
-
-            file = filePathMap[path];
+          let absoPath = "";
+          //查找相对路径
+          if (matchPath.startsWith("./")) {
+            absoPath = dirname(activeFile.path)+matchPath.substring(1)
+          } else {
+            //对于../../开头的路径，需要向上查找匹配
+            let num = matchPath.split("../").length-1;
+            absoPath = matchPath;
+            for (let i=0;i<num;i++) {
+              absoPath = absoPath.substring(0,absoPath.lastIndexOf("/"))
+            }
           }
+          file = this.app.vault.getAbstractFileByPath(absoPath);
         }
         // 尽可能短路径
         if (!file) {
@@ -457,11 +444,16 @@ export default class imageAutoUploadPlugin extends Plugin {
           const abstractImageFile = join(basePath, file.path);
 
           if (isAssetTypeAnImage(abstractImageFile)) {
-            imageList.push({
+            let pushObj = {
               path: abstractImageFile,
+              obspath: file.path,
               name: imageName,
               source: match.source,
-            });
+            };
+            //如果文件中有重复引用的图片，只上传一次
+            if (!imageList.find(item=>item.path===abstractImageFile&&item.name===imageName&&item.source===match.source)) {
+              imageList.push(pushObj);
+            }
           }
         }
       }
@@ -497,7 +489,10 @@ export default class imageAutoUploadPlugin extends Plugin {
         if (this.settings.deleteSource) {
           imageList.map(image => {
             if (!image.path.startsWith("http")) {
-              unlink(image.path, () => { });
+              let fileDel = this.app.vault.getAbstractFileByPath(image.obspath);
+              if (fileDel) {
+                this.app.vault.delete(fileDel);
+              }
             }
           });
         }
