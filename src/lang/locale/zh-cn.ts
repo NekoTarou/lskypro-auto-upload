@@ -4,30 +4,20 @@ export default {
   // setting.ts
   "Plugin Settings": "插件设置",
   "Auto pasted upload": "剪切板自动上传",
-  "If you set this value true, when you paste image, it will be auto uploaded(you should set the picGo server rightly)":
-    "启用该选项后，黏贴图片时会自动上传（你需要正确配置picgo）",
+  "If you set this value true, when you paste image, it will be auto uploaded":
+    "启用该选项后，黏贴图片时会自动上传",
   "Default uploader": "默认上传器",
-  "PicGo server": "PicGo server",
-  "Please input PicGo server": "请输入 PicGo server",
-  "PicGo delete server": "PicGo server 删除接口(请使用PicList来启用此功能)",
-  "PicList desc": "PicList是PicGo二次开发版，请Github搜索PicList下载",
-  "Please input PicGo delete server": "请输入 PicGo server 删除接口",
   "Delete image using PicList": "使用 PicList 删除图片",
-  "PicGo-Core path": "PicGo-Core 路径",
   "Delete successfully": "删除成功",
   "Delete failed": "删除失败",
   "Error, could not delete": "错误，无法删除",
   "Image size suffix": "图片大小后缀",
   "Image size suffix Description": "比如：|300 用于调整图片大小",
   "Please input image size suffix": "请输入图片大小后缀",
-  "Please input PicGo-Core path, default using environment variables":
-    "请输入 PicGo-Core path，默认使用环境变量",
   "Work on network": "应用网络图片",
   "Work on network Description":
     "当你上传所有图片时，也会上传网络图片。以及当你进行黏贴时，剪切板中的标准 md 图片会被上传",
   fixPath: "修正PATH变量",
-  fixPathWarning:
-    "此选项用于修复Linux和Mac上 PicGo-Core 上传失败的问题。它会修改 Obsidian 内的 PATH 变量，如果 Obsidian 遇到任何BUG，先关闭这个选项试试！",
   "Upload when clipboard has image and text together":
     "当剪切板同时拥有文本和图片剪切板数据时是否上传图片",
   "When you copy, some application like Excel will image and text to clipboard, you can upload or not.":
