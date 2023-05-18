@@ -54,7 +54,7 @@ export default class imageAutoUploadPlugin extends Plugin {
   async onload() {
     await this.loadSettings();
     this.helper = new Helper(this.app);
-    this.lskyUploader = new LskyProUploader(this.settings);
+    this.lskyUploader = new LskyProUploader(this.settings,this.app);
     if (this.settings.uploader === "LskyPro") {
       this.uploader = this.lskyUploader;
     } else {
@@ -134,6 +134,7 @@ export default class imageAutoUploadPlugin extends Plugin {
   }
 
   async downloadAllImageFiles() {
+    debugger
     const fileArray = this.helper.getAllFiles();
     const folderPathAbs = this.getAttachmentFolderPath();
     let absfolder = this.app.vault.getAbstractFileByPath(folderPathAbs);
@@ -148,6 +149,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       }
 
       const url = file.path;
+      debugger
       const asset = getUrlAsset(url);
       let [name, ext] = [
         decodeURI(parse(asset).name).replaceAll(/[\\\\/:*?\"<>|]/g, "-"),
@@ -158,7 +160,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       if (this.app.vault.getAbstractFileByPath(folderPathAbs+"/"+asset)) {
         name = (Math.random() + 1).toString(36).substring(2, 7);
       }
-
+debugger
       const response = await this.download(url, folderPathAbs, name, ext);
 
       if (response.ok) {
@@ -200,7 +202,11 @@ export default class imageAutoUploadPlugin extends Plugin {
     // 当前文件夹下的子文件夹
     if (assetFolder.startsWith("./")) {
       assetFolder = assetFolder.substring(1);
-      return parentPath + (assetFolder==="/"?"":assetFolder);
+      let pathTem = parentPath + (assetFolder==="/"?"":assetFolder);
+      while(pathTem.startsWith("/")) {
+        pathTem = pathTem.substring(1);
+      }
+      return pathTem;
     } else {
       return assetFolder;
     }
@@ -249,99 +255,6 @@ export default class imageAutoUploadPlugin extends Plugin {
         msg: err,
       };
     }
-  }
-
-  registerFileMenu() {
-    this.registerEvent(
-      this.app.workspace.on(
-        "file-menu",
-        (menu: Menu, file: TFile, source: string) => {
-          if (!isAssetTypeAnImage(file.path)) {
-            return false;
-          }
-          menu.addItem((item: MenuItem) => {
-            item
-              .setTitle("Upload")
-              .setIcon("upload")
-              .onClick(() => {
-                if (!(file instanceof TFile)) {
-                  return false;
-                }
-                this.fileMenuUpload(file);
-              });
-          });
-        }
-      )
-    );
-  }
-
-  fileMenuUpload(file: TFile) {
-    let content = this.helper.getValue();
-
-    const basePath = (
-      this.app.vault.adapter as FileSystemAdapter
-    ).getBasePath();
-    let imageList: Image[] = [];
-    const fileArray = this.helper.getAllFiles();
-
-    for (const match of fileArray) {
-      const imageName = match.name;
-      const encodedUri = match.path;
-
-      const fileName = basename(decodeURI(encodedUri));
-
-      if (file && file.name === fileName) {
-        const abstractImageFile = join(basePath, file.path);
-
-        if (isAssetTypeAnImage(abstractImageFile)) {
-          imageList.push({
-            path: abstractImageFile,
-            obspath: match.path,
-            name: imageName,
-            source: match.source,
-          });
-        }
-      }
-    }
-
-    if (imageList.length === 0) {
-      new Notice("没有解析到图像文件");
-      return;
-    }
-
-    this.uploader.uploadFiles(imageList.map(item => item.path)).then(res => {
-      if (res.success) {
-        let uploadUrlList = res.result;
-        const uploadUrlFullResultList = res.fullResult || [];
-        this.settings.uploadedImages = [
-          ...(this.settings.uploadedImages || []),
-          ...uploadUrlFullResultList,
-        ];
-        this.saveSettings();
-        imageList.map(item => {
-          const uploadImage = uploadUrlList.shift();
-          content = content.replaceAll(
-            item.source,
-            `![${item.name}${this.settings.imageSizeSuffix || ""
-            }](${uploadImage})`
-          );
-        });
-        this.helper.setValue(content);
-
-        if (this.settings.deleteSource) {
-          imageList.map(image => {
-            if (!image.path.startsWith("http")) {
-              let delFile = this.app.vault.getAbstractFileByPath(image.obspath);
-              if (delFile) {
-                this.app.vault.delete(delFile);
-              }
-            }
-          });
-        }
-      } else {
-        new Notice("Upload error");
-      }
-    });
   }
 
   filterFile(fileArray: Image[]) {
@@ -399,15 +312,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       const imageName = match.name;
       const encodedUri = match.path;
 
-      if (encodedUri.startsWith("http")) {
-        imageList.push({
-          path: match.path,
-          obspath: match.obspath,
-          name: imageName,
-          source: match.source,
-        });
-      } else {
-        debugger
+      if (!encodedUri.startsWith("http")) {
         const matchPath = decodeURI(encodedUri);
         const fileName = basename(matchPath);
         let file;
@@ -466,7 +371,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       new Notice(`共找到${imageList.length}个图像文件，开始上传`);
     }
 
-    this.uploader.uploadFiles(imageList.map(item => item.path)).then(res => {
+    this.uploader.uploadFilesByPath(imageList.map(item => item.obspath)).then(res => {
       if (res.success) {
         let uploadUrlList = res.result;
         const uploadUrlFullResultList = res.fullResult || [];
@@ -532,7 +437,7 @@ export default class imageAutoUploadPlugin extends Plugin {
 
             if (imageList.length !== 0) {
               this.uploader
-                .uploadFiles(imageList.map(item => item.path))
+                .uploadFilesByPath(imageList.map(item => item.path))
                 .then(res => {
                   let value = this.helper.getValue();
                   if (res.success) {
@@ -599,14 +504,10 @@ export default class imageAutoUploadPlugin extends Plugin {
           }
 
           if (files.length !== 0 && files[0].type.startsWith("image")) {
-            let sendFiles: Array<String> = [];
             let files = evt.dataTransfer.files;
-            Array.from(files).forEach((item, index) => {
-              sendFiles.push(item.path);
-            });
             evt.preventDefault();
 
-            const data = await this.uploader.uploadFiles(sendFiles);
+            const data = await this.uploader.uploadFiles(Array.from(files));
 
             if (data.success) {
               const uploadUrlFullResultList = data.fullResult ?? [];
