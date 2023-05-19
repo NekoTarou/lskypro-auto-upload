@@ -1,7 +1,7 @@
 {
   "id": "lskypro-auto-upload",
   "name": "Auto upload image to lskypro",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "1.2.8",
   "description": "Auto upload images from clipboard to lskypro",
   "author": "NekouTarou",
