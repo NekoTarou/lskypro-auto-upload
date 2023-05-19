@@ -1,5 +1,5 @@
 import { PluginSettings } from "./setting";
-import {  App } from "obsidian";
+import {  App, TFile } from "obsidian";
 //兰空上传器
 export class LskyProUploader {
   settings: PluginSettings;
@@ -36,12 +36,10 @@ export class LskyProUploader {
   }
   //上传文件，返回promise对象
   promiseRequest(file: any) {
-    debugger
     let requestOptions = this.getRequestOptions(file);
     return new Promise(resolve => {
       fetch(this.lskyUrl, requestOptions).then(response => {
         response.json().then(value => {
-          debugger
           if (!value.status) {
             return resolve({
               code: -1,
@@ -69,10 +67,9 @@ export class LskyProUploader {
   }
   //通过路径创建文件
   async createFileObjectFromPath(path: string) {
-    debugger
     return new Promise(resolve => {
-      debugger
       let obsfile = this.app.vault.getAbstractFileByPath(path);
+      //@ts-ignore
       this.app.vault.readBinary(obsfile).then(data=>{
         const fileName = path.split("/").pop(); // 获取文件名
         const fileExtension = fileName.split(".").pop(); // 获取后缀名
@@ -109,7 +106,6 @@ export class LskyProUploader {
     });
     try {
       let reurnObj = await Promise.all(promiseArr);
-      debugger
       let failItem:any = reurnObj.find((item: { code: number })=>item.code===-1);
       if (failItem) {
         throw {err:failItem.msg}

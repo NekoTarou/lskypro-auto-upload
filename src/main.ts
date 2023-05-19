@@ -4,9 +4,6 @@ import {
   FileSystemAdapter,
   Editor,
   Menu,
-  MenuItem,
-  TFile,
-  normalizePath,
   Notice,
   addIcon,
   requestUrl,
@@ -100,8 +97,6 @@ export default class imageAutoUploadPlugin extends Plugin {
     });
 
     this.setupPasteHandler();
-    this.registerFileMenu();
-
     this.registerSelection();
   }
 
@@ -124,7 +119,8 @@ export default class imageAutoUploadPlugin extends Plugin {
                   (item: { imgUrl: string }) => item.imgUrl === markdownUrl
                 )
               ) {
-                this.addMenu(menu, markdownUrl, editor);
+                //TODO 选中连接，右键可以上传
+                //this.addMenu(menu, markdownUrl, editor);
               }
             }
           }
@@ -134,7 +130,6 @@ export default class imageAutoUploadPlugin extends Plugin {
   }
 
   async downloadAllImageFiles() {
-    debugger
     const fileArray = this.helper.getAllFiles();
     const folderPathAbs = this.getAttachmentFolderPath();
     let absfolder = this.app.vault.getAbstractFileByPath(folderPathAbs);
@@ -143,13 +138,13 @@ export default class imageAutoUploadPlugin extends Plugin {
     }
 
     let imageArray = [];
+    let count:number = 0;
     for (const file of fileArray) {
       if (!file.path.startsWith("http")) {
         continue;
       }
-
+      count++;
       const url = file.path;
-      debugger
       const asset = getUrlAsset(url);
       let [name, ext] = [
         decodeURI(parse(asset).name).replaceAll(/[\\\\/:*?\"<>|]/g, "-"),
@@ -160,16 +155,19 @@ export default class imageAutoUploadPlugin extends Plugin {
       if (this.app.vault.getAbstractFileByPath(folderPathAbs+"/"+asset)) {
         name = (Math.random() + 1).toString(36).substring(2, 7);
       }
-debugger
-      const response = await this.download(url, folderPathAbs, name, ext);
-
-      if (response.ok) {
-        imageArray.push({
-          source: file.source,
-          name: name,
-          path: response.path,
-        });
+      try {
+        const response = await this.download(url, folderPathAbs, name, ext);
+        if (response.ok) {
+          imageArray.push({
+            source: file.source,
+            name: name,
+            path: response.path,
+          });
+        }
+      } catch (error) {
+        
       }
+
     }
     let value = this.helper.getValue();
     imageArray.map(image => {
@@ -184,7 +182,7 @@ debugger
     this.helper.setValue(value);
 
     new Notice(
-      `all: ${fileArray.length}\nsuccess: ${imageArray.length}\nfailed: ${fileArray.length - imageArray.length
+      `all: ${count}\nsuccess: ${imageArray.length}\nfailed: ${count - imageArray.length
       }`
     );
   }

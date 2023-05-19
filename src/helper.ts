@@ -9,7 +9,8 @@ interface Image {
 }
 // ![](./dsa/aa.png) local image should has ext
 // ![](https://dasdasda) internet image should not has ext
-const REGEX_FILE = /\!\[(.*?)\]\((\S+\.\w+)\)|\!\[(.*?)\]\((https?:\/\/.*?)\)/g;
+//const REGEX_FILE = /\!\[(.*?)\]\((\S+\.\w+)\)|\!\[(.*?)\]\((https?:\/\/.*?)\)/g;
+const REGEX_FILE = /!\[(.*?)\]\((.*?)\)/g;
 const REGEX_WIKI_FILE = /\!\[\[(.*?)(\s\|.*?)?\]\]/g;
 export default class Helper {
   app: App;
@@ -72,11 +73,14 @@ export default class Helper {
 
       let name = match[1];
       let path = match[2];
-      if (name === undefined) {
+      if (!name&&match.length>3) {
         name = match[3];
       }
-      if (path === undefined) {
+      if (!path&&match.length>4) {
         path = match[4];
+      }
+      if (!name) {
+        name = path?.substring(path?.lastIndexOf('/')+1)
       }
 
       fileArray.push({
