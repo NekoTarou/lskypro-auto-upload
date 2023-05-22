@@ -2,7 +2,7 @@
   "name": "lskypro-auto-upload",
   "version": "1.0.2",
   "type": "module",
-  "description": "This plugin uploads images from your clipboard to lskypro and embeds uploaded image to your note",
+  "description": "Auto upload images from clipboard to lskypro",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
