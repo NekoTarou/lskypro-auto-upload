@@ -515,7 +515,7 @@ export default class imageAutoUploadPlugin extends Plugin {
               ];
               this.saveSettings();
               data.result.map((value: string) => {
-                let pasteId = (Math.random() + 1).toString(36).substr(2, 5);
+                let pasteId = (Math.random() + 1).toString(36).substring(2, 7);
                 this.insertTemporaryText(editor, pasteId);
                 this.embedMarkDownImage(editor, pasteId, value, files[0].name);
               });
@@ -551,7 +551,7 @@ export default class imageAutoUploadPlugin extends Plugin {
     callback: Function,
     clipboardData: DataTransfer
   ) {
-    let pasteId = (Math.random() + 1).toString(36).substr(2, 5);
+    let pasteId = (Math.random() + 1).toString(36).substring(2, 7);
     this.insertTemporaryText(editor, pasteId);
     const name = clipboardData.files[0].name;
     try {
