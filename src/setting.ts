@@ -1,7 +1,6 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import imageAutoUploadPlugin from "./main";
 import { t } from "./lang/helpers";
-import { getOS } from "./utils";
 
 export interface PluginSettings {
   uploadByClipSwitch: boolean;
@@ -42,9 +41,6 @@ export class SettingTab extends PluginSettingTab {
 
   display(): void {
     let { containerEl } = this;
-
-    const os = getOS();
-
     containerEl.empty();
     containerEl.createEl("h2", { text: t("Plugin Settings") });
     new Setting(containerEl)
