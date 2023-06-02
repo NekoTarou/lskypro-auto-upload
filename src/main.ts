@@ -39,7 +39,7 @@ export default class imageAutoUploadPlugin extends Plugin {
   uploader: LskyProUploader;
 
   async loadSettings() {
-    this.settings = Object.assign(DEFAULT_SETTINGS, await this.loadData());
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
   }
 
   async saveSettings() {

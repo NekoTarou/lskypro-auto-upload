@@ -1,6 +1,6 @@
 {
   "name": "lskypro-auto-upload",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "Auto upload images from clipboard to lskypro",
   "main": "main.js",
