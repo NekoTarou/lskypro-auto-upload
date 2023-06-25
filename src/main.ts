@@ -132,6 +132,12 @@ export default class imageAutoUploadPlugin extends Plugin {
   async downloadAllImageFiles() {
     const fileArray = this.helper.getAllFiles();
     const folderPathAbs = this.getAttachmentFolderPath();
+    if (folderPathAbs==null||!folderPathAbs) {
+      new Notice(
+      `Get attachment folder path faild.`
+      );
+      return ;
+    }
     let absfolder = this.app.vault.getAbstractFileByPath(folderPathAbs);
     if (!absfolder) {
       this.app.vault.createFolder(folderPathAbs);
@@ -194,8 +200,11 @@ export default class imageAutoUploadPlugin extends Plugin {
       assetFolder = "/"
     }
     const activeFile = this.app.vault.getAbstractFileByPath(
-      this.app.workspace.getActiveFile().path
+      this.app.workspace.getActiveFile()?.path
     );
+    if (activeFile==null||!activeFile) {
+      return null;
+    }
     const parentPath = activeFile.parent.path;
     // 当前文件夹下的子文件夹
     if (assetFolder.startsWith("./")) {
