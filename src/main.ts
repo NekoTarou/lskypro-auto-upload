@@ -132,7 +132,7 @@ export default class imageAutoUploadPlugin extends Plugin {
   async downloadAllImageFiles() {
     const fileArray = this.helper.getAllFiles();
     const folderPathAbs = this.getAttachmentFolderPath();
-    if (!folderPathAbs) {
+    if (folderPathAbs==null||!folderPathAbs) {
       new Notice(
       `Get attachment folder path faild.`
       );
@@ -202,7 +202,7 @@ export default class imageAutoUploadPlugin extends Plugin {
     const activeFile = this.app.vault.getAbstractFileByPath(
       this.app.workspace.getActiveFile()?.path
     );
-    if (!activeFile) {
+    if (activeFile==null||!activeFile) {
       return null;
     }
     const parentPath = activeFile.parent.path;
