@@ -68,6 +68,13 @@ export class LskyProUploader {
   //通过路径创建文件
   async createFileObjectFromPath(path: string) {
     return new Promise(resolve => {
+      if(path.startsWith('https://') || path.startsWith('http://')){
+        return fetch(path).then(response => {
+          return response.blob().then(blob => {
+            resolve(new File([blob], path.split("/").pop()));
+          });
+        });
+      }
       let obsfile = this.app.vault.getAbstractFileByPath(path);
       //@ts-ignore
       this.app.vault.readBinary(obsfile).then(data=>{
