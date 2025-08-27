@@ -6,5 +6,5 @@
   "description": "Auto upload images from clipboard to lskypro",
   "author": "NekouTarou",
   "authorUrl": "https://jiusia.top",
-  "isDesktopOnly": true
+  "isDesktopOnly": false
 }
