@@ -49,7 +49,7 @@ image-auto-upload: true
 
 ## Upload all local images file by command
 
-press ctrl+P and input upload all images，enter, then will auto upload all local images
+press ctrl+P and input upload all images(Upload all images-All images in the current file)，enter, then will auto upload all local images
 
 You can also process all notes at once with the new command:
 
