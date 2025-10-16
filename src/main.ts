@@ -8,6 +8,7 @@ import {
   addIcon,
   requestUrl,
   MarkdownFileInfo,
+  TFile,
 } from "obsidian";
 
 import { join, parse, basename, dirname } from "path";
@@ -69,12 +70,13 @@ export default class imageAutoUploadPlugin extends Plugin {
 
     this.addCommand({
       id: "Upload all images",
-      name: "Upload all images",
+      name: "Upload all images-All images in the current file",
       checkCallback: (checking: boolean) => {
         let leaf = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (leaf) {
           if (!checking) {
-            this.uploadAllFile();
+            const file = this.app.workspace.getActiveFile();
+            this.uploadAllFile(file!);
           }
           return true;
         }
@@ -302,18 +304,27 @@ export default class imageAutoUploadPlugin extends Plugin {
     }
     return fileMap[fileName];
   }
-  // uploda all file
-  uploadAllFile() {
-    let content = this.helper.getValue();
+  // upload all images in a specific markdown file
+  async uploadAllFile(currentFile?: TFile) {
+    const activeFile = currentFile ?? this.app.workspace.getActiveFile();
+    if (!activeFile) {
+      new Notice("没有打开的文件");
+      return;
+    }
+
+    // 获取内容：若为当前激活文件且有编辑器，则使用编辑器内容；否则读取文件内容
+    const isActive =
+      activeFile === this.app.workspace.getActiveFile() &&
+      !!this.app.workspace.getActiveViewOfType(MarkdownView);
+    let content = isActive ? this.helper.getValue() : await this.app.vault.read(activeFile);
 
     const basePath = (
       this.app.vault.adapter as FileSystemAdapter
     ).getBasePath();
-    const activeFile = this.app.workspace.getActiveFile();
     const fileMap = arrayToObject(this.app.vault.getFiles(), "name");
     const filePathMap = arrayToObject(this.app.vault.getFiles(), "path");
     let imageList: Image[] = [];
-    const fileArray = this.filterFile(this.helper.getAllFiles());
+    const fileArray = this.filterFile(this.helper.getImageLink(content));
 
     for (const match of fileArray) {
       const imageName = match.name;
@@ -396,7 +407,11 @@ export default class imageAutoUploadPlugin extends Plugin {
             }](${uploadImage})`
           );
         });
-        this.helper.setValue(content);
+        if (isActive) {
+          this.helper.setValue(content);
+        } else {
+          this.app.vault.modify(activeFile, content);
+        }
 
         if (this.settings.deleteSource) {
           imageList.map(image => {
