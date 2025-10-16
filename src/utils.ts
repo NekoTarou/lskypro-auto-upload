@@ -20,15 +20,18 @@ const IMAGE_EXT_LIST = [
 export function isAnImage(ext: string) {
   return IMAGE_EXT_LIST.includes(ext.toLowerCase());
 }
-export function isAssetTypeAnImage(path: string): Boolean {
+export function isAssetTypeAnImage(path: string): boolean {
   return isAnImage(extname(path));
 }
 
 export async function streamToString(stream: Readable) {
-  const chunks = [];
+  const chunks: Uint8Array[] = [];
 
   for await (const chunk of stream) {
-    chunks.push(Buffer.from(chunk));
+    const buf: Uint8Array = Buffer.isBuffer(chunk)
+      ? (chunk as Uint8Array)
+      : Buffer.from(typeof chunk === "string" ? chunk : String(chunk));
+    chunks.push(buf);
   }
 
   return Buffer.concat(chunks).toString("utf-8");

@@ -13,3 +13,5 @@ main.js
 data.json
 
 workspace.code-workspace
+test/
+.DS_Store

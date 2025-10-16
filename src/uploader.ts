@@ -1,5 +1,5 @@
 import { PluginSettings } from "./setting";
-import {  App, TFile } from "obsidian";
+import { App, TFile } from "obsidian";
 //兰空上传器
 export class LskyProUploader {
   settings: PluginSettings;
@@ -35,7 +35,7 @@ export class LskyProUploader {
     };
   }
   //上传文件，返回promise对象
-  promiseRequest(file: any) {
+  promiseRequest(file: File) {
     let requestOptions = this.getRequestOptions(file);
     return new Promise(resolve => {
       fetch(this.lskyUrl, requestOptions).then(response => {
@@ -51,7 +51,7 @@ export class LskyProUploader {
               code: 0,
               msg: "success",
               data: value.data?.links?.url,
-              fullResult: {} || [],
+              fullResult: [],
             });
           }
         });
@@ -66,8 +66,8 @@ export class LskyProUploader {
     });
   }
   //通过路径创建文件
-  async createFileObjectFromPath(path: string) {
-    return new Promise(resolve => {
+  async createFileObjectFromPath(path: string): Promise<File> {
+    return new Promise<File>(resolve => {
       if(path.startsWith('https://') || path.startsWith('http://')){
         return fetch(path).then(response => {
           return response.blob().then(blob => {
@@ -90,9 +90,9 @@ export class LskyProUploader {
     });
   }
 
-  async uploadFilesByPath(fileList: Array<String>): Promise<any> {
-    let promiseArr = fileList.map(async filepath => {
-      let file = await this.createFileObjectFromPath(filepath.format());
+  async uploadFilesByPath(fileList: string[]): Promise<any> {
+    let promiseArr = fileList.map(async (filepath: string) => {
+      let file = await this.createFileObjectFromPath(filepath);
       return this.promiseRequest(file);
     });
     try {

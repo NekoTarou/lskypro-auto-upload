@@ -22,7 +22,7 @@
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.0",
     "@types/electron": "^1.6.10",
-    "@types/node": "^14.14.2",
+    "@types/node": "^18.11.18",
     "obsidian": "^1.2.8",
     "rollup": "^3.21.6",
     "tslib": "^2.5.0",
@@ -31,5 +31,6 @@
   "dependencies": {
     "fix-path": "^4.0.0",
     "image-type": "^5.2.0"
-  }
+  },
+  "packageManager": "npm@10.8.2"
 }

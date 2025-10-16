@@ -244,7 +244,7 @@ export default class imageAutoUploadPlugin extends Plugin {
       if (!ext) {
         path = folderPath +'/'+ `${name}.${type.ext}`;
       }
-      this.app.vault.createBinary(path,buffer,{
+      (this.app.vault as any).createBinary(path, buffer, {
         ctime: Date.now(),
         mtime: Date.now()
       })
@@ -359,7 +359,7 @@ export default class imageAutoUploadPlugin extends Plugin {
             let pushObj = {
               path: abstractImageFile,
               obspath: file.path,
-              name: imageName,
+              name: file?.name || imageName,
               source: match.source,
             };
             //如果文件中有重复引用的图片，只上传一次
