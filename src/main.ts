@@ -97,6 +97,22 @@ export default class imageAutoUploadPlugin extends Plugin {
         return false;
       },
     });
+    this.addCommand({
+      id: "Upload all images in all notes (reuse)",
+      name: "Upload all images - All notes in vault (reuse)",
+      checkCallback: (checking: boolean) => {
+        const hasMarkdown = this.app.vault
+          .getFiles()
+          .some(f => f.path.endsWith(".md"));
+        if (hasMarkdown) {
+          if (!checking) {
+            this.uploadAllNotesByUploadAllFile();
+          }
+          return true;
+        }
+        return false;
+      },
+    });
 
     this.setupPasteHandler();
     this.registerSelection();
@@ -383,50 +399,61 @@ export default class imageAutoUploadPlugin extends Plugin {
     }
 
     if (imageList.length === 0) {
-      new Notice("没有解析到图像文件");
+      new Notice(`${activeFile.path}没有解析到图像文件`);
       return;
     } else {
-      new Notice(`共找到${imageList.length}个图像文件，开始上传`);
+      new Notice(`${activeFile.path}共找到${imageList.length}个图像文件，开始上传`);
     }
 
-    this.uploader.uploadFilesByPath(imageList.map(item => item.obspath)).then(res => {
-      if (res.success) {
-        let uploadUrlList = res.result;
-        const uploadUrlFullResultList = res.fullResult || [];
+    const res = await this.uploader.uploadFilesByPath(
+      imageList.map(item => item.obspath)
+    );
+    if (res.success) {
+      let uploadUrlList = res.result;
+      const uploadUrlFullResultList = res.fullResult || [];
 
-        this.settings.uploadedImages = [
-          ...(this.settings.uploadedImages || []),
-          ...uploadUrlFullResultList,
-        ];
-        this.saveSettings();
-        imageList.map(item => {
-          const uploadImage = uploadUrlList.shift();
-          content = content.replaceAll(
-            item.source,
-            `![${item.name}${this.settings.imageSizeSuffix || ""
-            }](${uploadImage})`
-          );
-        });
-        if (isActive) {
-          this.helper.setValue(content);
-        } else {
-          this.app.vault.modify(activeFile, content);
-        }
-
-        if (this.settings.deleteSource) {
-          imageList.map(image => {
-            if (!image.path.startsWith("http")) {
-              let fileDel = this.app.vault.getAbstractFileByPath(image.obspath);
-              if (fileDel) {
-                this.app.vault.delete(fileDel);
-              }
-            }
-          });
-        }
+      this.settings.uploadedImages = [
+        ...(this.settings.uploadedImages || []),
+        ...uploadUrlFullResultList,
+      ];
+      await this.saveSettings();
+      imageList.map(item => {
+        const uploadImage = uploadUrlList.shift();
+        content = content.replaceAll(
+          item.source,
+          `![${item.name}${this.settings.imageSizeSuffix || ""}](${uploadImage})`
+        );
+      });
+      if (isActive) {
+        this.helper.setValue(content);
       } else {
-        new Notice("Upload error");
+        await this.app.vault.modify(activeFile, content);
       }
-    });
+
+      if (this.settings.deleteSource) {
+        imageList.map(image => {
+          if (!image.path.startsWith("http")) {
+            let fileDel = this.app.vault.getAbstractFileByPath(image.obspath);
+            if (fileDel) {
+              this.app.vault.delete(fileDel);
+            }
+          }
+        });
+      }
+    } else {
+      new Notice("Upload error");
+    }
+  }
+
+  // upload images across all markdown notes by reusing uploadAllFile
+  async uploadAllNotesByUploadAllFile() {
+    const mdFiles = this.app.vault
+      .getFiles()
+      .filter(f => f.path.endsWith(".md"));
+    for (const md of mdFiles) {
+      await this.uploadAllFile(md);
+    }
+    new Notice(`处理完成，共处理${mdFiles.length}个文件`);
   }
 
   setupPasteHandler() {
