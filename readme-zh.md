@@ -3,6 +3,26 @@
 这是一个支持直接上传图片到图床[Lsky](https://github.com/lsky-org/lsky-pro)的工具，基于[renmu123/obsidian-image-auto-upload-plugin](https://github.com/renmu123/obsidian-image-auto-upload-plugin.git)改造。
 **更新插件后记得重启一下 Obsidian**
 
+## 本次提交更新内容
+
+- 新增命令：`Upload all images - All notes in vault (reuse)`。
+  - 扫描库中所有 Markdown 笔记，上传本地图片并将引用统一替换为外链。
+  - 复用已有方法 `uploadAllFile(currentFile?: TFile)` 逐个处理文件，避免重复逻辑。
+- 重构 `uploadAllFile`：支持传入 `TFile` 参数并顺序执行（`await`）。
+  - 当处理当前激活文件时，使用编辑器内容并通过编辑器更新。
+  - 当处理非激活文件时，从 vault 读取内容，处理后直接写回文件。
+- 更新原有“上传当前文件所有图片”的命令，使其向改造后的方法传入当前激活文件。
+
+### 新命令使用方式
+
+1. 打开命令面板（`Ctrl+P`）。
+2. 输入并执行：`Upload all images - All notes in vault (reuse)`。
+3. 插件会遍历所有 `.md` 文件，上传本地图片并替换引用，完成后会弹出统计提示。
+
+说明：
+- 本地图片会被上传；网络图片的处理遵循现有设置（`workOnNetWork` 与黑名单域名过滤）。
+- 相对路径与绝对路径的解析与当前文件命令保持一致。
+
 # 开始
 
 1. 安装 LskyPro 图床，并进行配置，配置参考[官网](https://www.lsky.pro/)
@@ -30,6 +50,11 @@ image-auto-upload: true
 ## 批量上传一个文件中的所有图像文件
 
 输入 `ctrl+P` 呼出面板，输入 `upload all images`，点击回车，就会自动开始上传。
+
+现在也可以一次性处理所有笔记：
+
+- 打开命令面板并执行：`Upload all images - All notes in vault (reuse)`
+- 插件会复用同样的逻辑逐个处理并替换链接。
 
 路径解析优先级，会依次按照优先级查找：
 
