@@ -4,13 +4,14 @@
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "es5",
+    "target": "ES2021",
     "downlevelIteration": true,
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
-    "lib": ["dom", "es5", "scripthost", "es2015", "es2020", "ESNext"]
+    "lib": ["DOM", "ES2021"],
+    "types": ["node"]
   },
   "include": ["**/*.ts"]
 }

@@ -1,4 +1,4 @@
-import { MarkdownView, App } from "obsidian";
+import { MarkdownView, App, Editor } from "obsidian";
 import { parse } from "path";
 
 interface Image {
@@ -36,30 +36,31 @@ export default class Helper {
   getEditor() {
     const mdView = this.app.workspace.getActiveViewOfType(MarkdownView);
     if (mdView) {
-      return mdView.editor;
+      return mdView.editor as Editor;
     } else {
       return null;
     }
   }
   getValue() {
     const editor = this.getEditor();
-    return editor.getValue();
+    return editor ? editor.getValue() : "";
   }
 
   setValue(value: string) {
     const editor = this.getEditor();
-    const { left, top } = editor.getScrollInfo();
+    if (!editor) return;
+    const scrollInfo = (editor as any).getScrollInfo?.() ?? { left: 0, top: 0 };
     const position = editor.getCursor();
 
     editor.setValue(value);
-    editor.scrollTo(left, top);
+    (editor as any).scrollTo?.(scrollInfo.left, scrollInfo.top);
     editor.setCursor(position);
   }
 
   // get all file urls, include local and internet
   getAllFiles(): Image[] {
     const editor = this.getEditor();
-    let value = editor.getValue();
+    let value = editor ? editor.getValue() : "";
     return this.getImageLink(value);
   }
   getImageLink(value: string): Image[] {
