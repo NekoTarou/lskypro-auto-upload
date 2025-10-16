@@ -49,7 +49,7 @@ image-auto-upload: true
 
 ## 批量上传一个文件中的所有图像文件
 
-输入 `ctrl+P` 呼出面板，输入 `upload all images`，点击回车，就会自动开始上传。
+输入 `ctrl+P` 呼出面板，输入 `upload all images`(Upload all images-All images in the current file)，点击回车，就会自动开始上传。
 
 现在也可以一次性处理所有笔记：
 
